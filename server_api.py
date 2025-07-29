@@ -4,14 +4,19 @@ DiamondFinder API Server
 Combined API for ore generation and enriched server data
 """
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Optional
 import json
 import os
 import logging
 import uvicorn
+
+# Configure logging FIRST, before any imports that might use logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Optional
 
 # Import ore generation services
 try:
@@ -25,10 +30,6 @@ except ImportError as e:
 except Exception as e:
     ORE_SERVICES_AVAILABLE = False
     logger.warning(f"⚠️ Ore generation services failed to load: {e}")
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
