@@ -18,9 +18,13 @@ try:
     from ore_generator import OreFinderService, OreResult
     from java_ore_generator import JavaOreFinderService, JavaOreResult
     ORE_SERVICES_AVAILABLE = True
-except ImportError:
+    logger.info("✅ Ore generation services loaded successfully")
+except ImportError as e:
     ORE_SERVICES_AVAILABLE = False
-    logger.warning("Ore generation services not available")
+    logger.warning(f"⚠️ Ore generation services not available: {e}")
+except Exception as e:
+    ORE_SERVICES_AVAILABLE = False
+    logger.warning(f"⚠️ Ore generation services failed to load: {e}")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -43,9 +47,17 @@ app.add_middleware(
 )
 
 # Initialize the ore finder services if available
+ore_service = None
+java_ore_service = None
+
 if ORE_SERVICES_AVAILABLE:
-    ore_service = OreFinderService()
-    java_ore_service = JavaOreFinderService()
+    try:
+        ore_service = OreFinderService()
+        java_ore_service = JavaOreFinderService()
+        logger.info("✅ Ore generation services initialized successfully")
+    except Exception as e:
+        ORE_SERVICES_AVAILABLE = False
+        logger.warning(f"⚠️ Failed to initialize ore services: {e}")
 
 # Pydantic models for ore generation API
 class OreLocationResponse(BaseModel):
@@ -204,8 +216,17 @@ async def get_server_count():
 @app.post("/api/v1/find-ores", response_model=OreSearchResponse)
 async def find_ores(request: OreSearchRequest):
     """Find ores in Bedrock edition"""
-    if not ORE_SERVICES_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Ore generation services not available")
+    if not ORE_SERVICES_AVAILABLE or ore_service is None:
+        # Return a fallback response instead of error
+        return OreSearchResponse(
+            seed=request.seed,
+            search_coordinates={"x": request.x, "z": request.z},
+            chunk_coordinates={"x": request.x // 16, "z": request.z // 16},
+            total_ores=0,
+            ore_locations=[],
+            success=False,
+            message="Ore generation services are currently unavailable. Please try again later or use a different seed."
+        )
     
     try:
         logger.info(f"Searching for ores: seed={request.seed}, x={request.x}, z={request.z}, radius={request.radius}")
@@ -239,13 +260,32 @@ async def find_ores(request: OreSearchRequest):
         
     except Exception as e:
         logger.error(f"Error finding ores: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to find ores: {str(e)}")
+        # Return fallback response instead of error
+        return OreSearchResponse(
+            seed=request.seed,
+            search_coordinates={"x": request.x, "z": request.z},
+            chunk_coordinates={"x": request.x // 16, "z": request.z // 16},
+            total_ores=0,
+            ore_locations=[],
+            success=False,
+            message=f"Ore generation failed: {str(e)}"
+        )
 
 @app.post("/api/v1/java/find-ores", response_model=JavaOreSearchResponse)
 async def find_java_ores(request: JavaOreSearchRequest):
     """Find ores in Java edition"""
-    if not ORE_SERVICES_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Ore generation services not available")
+    if not ORE_SERVICES_AVAILABLE or java_ore_service is None:
+        # Return a fallback response instead of error
+        return JavaOreSearchResponse(
+            seed=request.seed,
+            search_coordinates={"x": request.x, "z": request.z},
+            version=request.version,
+            chunk_coordinates={"x": request.x // 16, "z": request.z // 16},
+            total_ores=0,
+            ore_locations=[],
+            success=False,
+            message="Ore generation services are currently unavailable. Please try again later or use a different seed."
+        )
     
     try:
         logger.info(f"Searching for Java ores: seed={request.seed}, x={request.x}, z={request.z}, version={request.version}")
@@ -281,13 +321,27 @@ async def find_java_ores(request: JavaOreSearchRequest):
         
     except Exception as e:
         logger.error(f"Error finding Java ores: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to find Java ores: {str(e)}")
+        # Return fallback response instead of error
+        return JavaOreSearchResponse(
+            seed=request.seed,
+            search_coordinates={"x": request.x, "z": request.z},
+            version=request.version,
+            chunk_coordinates={"x": request.x // 16, "z": request.z // 16},
+            total_ores=0,
+            ore_locations=[],
+            success=False,
+            message=f"Ore generation failed: {str(e)}"
+        )
 
 @app.get("/api/v1/test")
 async def test_generation():
     """Test ore generation"""
-    if not ORE_SERVICES_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Ore generation services not available")
+    if not ORE_SERVICES_AVAILABLE or ore_service is None:
+        return {
+            "status": "unavailable",
+            "message": "Ore generation services are not available",
+            "bedrock_test": None
+        }
     
     try:
         # Test Bedrock generation
@@ -302,13 +356,21 @@ async def test_generation():
         }
     except Exception as e:
         logger.error(f"Test generation failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Test generation failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Test generation failed: {str(e)}",
+            "bedrock_test": None
+        }
 
 @app.get("/api/v1/java/test")
 async def test_java_generation():
     """Test Java ore generation"""
-    if not ORE_SERVICES_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Ore generation services not available")
+    if not ORE_SERVICES_AVAILABLE or java_ore_service is None:
+        return {
+            "status": "unavailable",
+            "message": "Ore generation services are not available",
+            "java_test": None
+        }
     
     try:
         # Test Java generation
@@ -324,7 +386,11 @@ async def test_java_generation():
         }
     except Exception as e:
         logger.error(f"Java test generation failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Java test generation failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Java test generation failed: {str(e)}",
+            "java_test": None
+        }
 
 if __name__ == "__main__":
     # Run the server
