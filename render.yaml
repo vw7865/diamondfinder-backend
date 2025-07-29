@@ -3,13 +3,7 @@ services:
     name: diamondfinder-backend
     env: python
     plan: free
-    buildCommand: |
-      echo "🔨 Starting DiamondFinder backend build..."
-      pip install --no-cache-dir --upgrade pip
-      pip install --no-cache-dir -r requirements.txt
-      echo "🧪 Testing imports with postinstall.py..."
-      python postinstall.py
-      echo "✅ Build completed successfully!"
+    buildCommand: chmod +x build.sh && ./build.sh
     startCommand: python server_api.py
     envVars:
       - key: PYTHON_VERSION
@@ -25,6 +19,7 @@ services:
     buildFilter:
       paths:
         - "*.py"
+        - "*.sh"
         - "requirements.txt"
         - "runtime.txt"
         - "enriched_servers.json" 
