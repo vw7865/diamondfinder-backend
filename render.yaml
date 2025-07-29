@@ -3,10 +3,7 @@ services:
     name: diamondfinder-backend
     env: python
     plan: free
-    buildCommand: |
-      python -m pip install --upgrade pip
-      pip install -r requirements.txt
-      python test_imports.py
+    buildCommand: pip install -r requirements.txt
     startCommand: python server_api.py
     envVars:
       - key: PYTHON_VERSION
