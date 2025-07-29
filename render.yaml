@@ -4,7 +4,8 @@ services:
     env: python
     plan: free
     buildCommand: |
-      pip install -r requirements.txt
+      pip install --no-cache-dir --upgrade pip
+      pip install --no-cache-dir -r requirements.txt
       python postinstall.py
     startCommand: python server_api.py
     envVars:
@@ -14,6 +15,8 @@ services:
         value: 1
       - key: PORT
         value: 8000
+      - key: PIP_NO_CACHE_DIR
+        value: 1
     healthCheckPath: /health
     autoDeploy: true
     buildFilter:
