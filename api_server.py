@@ -346,6 +346,40 @@ async def clear_java_cache():
         logger.error(f"Failed to clear Java cache: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to clear cache: {str(e)}")
 
+@app.get("/enriched_servers.json")
+async def get_enriched_servers():
+    """Serve enriched server data from LunarClient"""
+    try:
+        import json
+        import os
+        
+        # Try to load the enriched servers file
+        enriched_file = "enriched_servers.json"
+        if os.path.exists(enriched_file):
+            with open(enriched_file, 'r') as f:
+                data = json.load(f)
+            logger.info(f"Serving enriched servers data: {len(data.get('servers', []))} servers")
+            return data
+        else:
+            # If no enriched data, try to generate it
+            logger.info("No enriched servers file found, attempting to generate...")
+            from server_enricher_v2 import ServerEnricher
+            
+            enricher = ServerEnricher()
+            await enricher.enrich_all_servers()
+            
+            if os.path.exists(enriched_file):
+                with open(enriched_file, 'r') as f:
+                    data = json.load(f)
+                logger.info(f"Generated and serving enriched servers data: {len(data.get('servers', []))} servers")
+                return data
+            else:
+                raise HTTPException(status_code=404, detail="Unable to generate enriched server data")
+                
+    except Exception as e:
+        logger.error(f"Error serving enriched servers: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to serve enriched servers: {str(e)}")
+
 if __name__ == "__main__":
     # Run the server
     uvicorn.run(

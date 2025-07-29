@@ -1,0 +1,10 @@
+aiohttp>=3.8.0
+asyncio
+sqlite3
+logging
+dataclasses
+typing
+datetime
+time
+os
+json 
