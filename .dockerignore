@@ -1,0 +1,3 @@
+# Ignore all Dockerfiles to force Python build
+Dockerfile*
+docker-compose* 

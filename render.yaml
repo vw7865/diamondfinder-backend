@@ -16,4 +16,10 @@ services:
       - key: PORT
         value: 8000
     healthCheckPath: /health
-    autoDeploy: true 
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - "*.py"
+        - "requirements.txt"
+        - "runtime.txt"
+        - "enriched_servers.json" 
