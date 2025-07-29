@@ -1,3 +1,12 @@
-# Ignore all Dockerfiles to force Python build
+# Ignore all Docker-related files to force Python build
 Dockerfile*
-docker-compose* 
+docker-compose*
+*.old
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env 
