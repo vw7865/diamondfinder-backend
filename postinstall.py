@@ -5,6 +5,11 @@ Post-install script to test imports and verify setup
 
 import sys
 import importlib
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def test_imports():
     """Test all required imports"""
