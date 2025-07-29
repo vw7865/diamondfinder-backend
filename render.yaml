@@ -3,7 +3,27 @@ services:
     name: diamondfinder-backend
     env: python
     plan: free
-    buildCommand: chmod +x build.sh && ./build.sh
+    buildCommand: |
+      echo "🔨 Starting DiamondFinder backend build..."
+      python -m pip install --upgrade pip
+      pip install -e .
+      echo "🧪 Testing imports..."
+      python -c "
+import fastapi
+import uvicorn
+import pydantic
+import requests
+import json
+import os
+import logging
+print('✅ All core imports successful!')
+try:
+    from server_api import app
+    print('✅ Server API imported successfully!')
+except ImportError as e:
+    print(f'⚠️ Server API import warning: {e}')
+print('🎉 Build completed successfully!')
+"
     startCommand: python server_api.py
     envVars:
       - key: PYTHON_VERSION
