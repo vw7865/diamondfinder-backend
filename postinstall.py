@@ -10,6 +10,7 @@ def test_imports():
     """Test all required imports"""
     print("🧪 Testing imports...")
     
+    # Core Python modules
     required_modules = [
         'fastapi',
         'uvicorn',
@@ -36,7 +37,20 @@ def test_imports():
         print(f"❌ Failed to import server_api: {e}")
         return False
     
-    print("\n🎉 All imports successful!")
+    # Test ore generation imports (optional)
+    try:
+        from ore_generator import OreFinderService
+        print("✅ Ore generation (Bedrock) imported successfully")
+    except ImportError as e:
+        print(f"⚠️  Ore generation (Bedrock) not available: {e}")
+    
+    try:
+        from java_ore_generator import JavaOreFinderService
+        print("✅ Ore generation (Java) imported successfully")
+    except ImportError as e:
+        print(f"⚠️  Ore generation (Java) not available: {e}")
+    
+    print("\n🎉 All core imports successful!")
     return True
 
 if __name__ == "__main__":
