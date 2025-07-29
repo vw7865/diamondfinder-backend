@@ -3,12 +3,17 @@ services:
     name: diamondfinder-backend
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+      python test_imports.py
     startCommand: python server_api.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: PYTHONUNBUFFERED
         value: 1
+      - key: PORT
+        value: 8000
     healthCheckPath: /health
     autoDeploy: true 
