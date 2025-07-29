@@ -4,9 +4,12 @@ services:
     env: python
     plan: free
     buildCommand: |
+      echo "🔨 Starting DiamondFinder backend build..."
       pip install --no-cache-dir --upgrade pip
       pip install --no-cache-dir -r requirements.txt
+      echo "🧪 Testing imports with postinstall.py..."
       python postinstall.py
+      echo "✅ Build completed successfully!"
     startCommand: python server_api.py
     envVars:
       - key: PYTHON_VERSION
