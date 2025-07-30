@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""
+Mock vanilla_generator for testing purposes
+Returns sample ore data when the real generator is not available
+"""
+
+import json
+import sys
+import random
+
+def generate_mock_ores(seed, chunk_x, chunk_z):
+    """Generate mock ore data for testing"""
+    # Use seed to make results deterministic
+    random.seed(seed + chunk_x * 1000 + chunk_z)
+    
+    # Generate some random ores in the chunk
+    ores = []
+    ore_types = ["diamond", "iron", "coal", "gold", "redstone", "lapis_lazuli", "emerald", "copper"]
+    
+    # Generate 2-8 random ores per chunk
+    num_ores = random.randint(2, 8)
+    
+    for _ in range(num_ores):
+        ore_type = random.choice(ore_types)
+        x = chunk_x * 16 + random.randint(0, 15)
+        y = random.randint(-64, 64)  # Reasonable Y range
+        z = chunk_z * 16 + random.randint(0, 15)
+        count = random.randint(1, 8)  # Ore vein size
+        
+        ores.append({
+            "type": ore_type,
+            "x": x,
+            "y": y,
+            "z": z,
+            "count": count
+        })
+    
+    return {
+        "seed": seed,
+        "chunk_x": chunk_x,
+        "chunk_z": chunk_z,
+        "ores": ores,
+        "total_count": sum(ore["count"] for ore in ores)
+    }
+
+def main():
+    if len(sys.argv) < 4:
+        print(json.dumps({"error": "Usage: vanilla_generator <seed> <chunk_x> <chunk_z>"}))
+        sys.exit(1)
+    
+    try:
+        seed = int(sys.argv[1])
+        chunk_x = int(sys.argv[2])
+        chunk_z = int(sys.argv[3])
+        
+        result = generate_mock_ores(seed, chunk_x, chunk_z)
+        print(json.dumps(result, indent=2))
+        
+    except ValueError as e:
+        print(json.dumps({"error": f"Invalid input: {e}"}))
+        sys.exit(1)
+    except Exception as e:
+        print(json.dumps({"error": f"Generation failed: {e}"}))
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main() 

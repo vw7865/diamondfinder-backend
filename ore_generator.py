@@ -77,13 +77,12 @@ class VanillaGeneratorWrapper:
             List of ore blocks found in the chunk
         """
         try:
-            # Call the C++ generator
+            # Call the generator
             cmd = [
                 self.generator_path,
-                "--seed", str(seed),
-                "--chunk-x", str(chunk_x),
-                "--chunk-z", str(chunk_z),
-                "--output-format", "json"
+                str(seed),
+                str(chunk_x),
+                str(chunk_z)
             ]
             
             logger.info(f"Generating chunk: seed={seed}, chunk_x={chunk_x}, chunk_z={chunk_z}")
@@ -114,6 +113,19 @@ class VanillaGeneratorWrapper:
         ores = []
         
         try:
+            # Handle mock generator format
+            if "ores" in data:
+                for ore_data in data["ores"]:
+                    ore_type = self._map_ore_type(ore_data["type"])
+                    ores.append(OreBlock(
+                        type=ore_type,
+                        x=ore_data["x"],
+                        y=ore_data["y"],
+                        z=ore_data["z"],
+                        count=ore_data["count"]
+                    ))
+                return ores
+            
             # Expected format from ext-vanillagenerator
             if "blocks" in data:
                 for block in data["blocks"]:
@@ -139,13 +151,21 @@ class VanillaGeneratorWrapper:
         """Map Minecraft ore types to our app's ore types"""
         mapping = {
             "diamond_ore": "Diamond",
-            "emerald_ore": "Emerald", 
+            "diamond": "Diamond",
+            "emerald_ore": "Emerald",
+            "emerald": "Emerald", 
             "gold_ore": "Gold",
+            "gold": "Gold",
             "iron_ore": "Iron",
+            "iron": "Iron",
             "coal_ore": "Coal",
+            "coal": "Coal",
             "redstone_ore": "Redstone",
+            "redstone": "Redstone",
             "lapis_ore": "Lapis Lazuli",
-            "copper_ore": "Copper"
+            "lapis_lazuli": "Lapis Lazuli",
+            "copper_ore": "Copper",
+            "copper": "Copper"
         }
         return mapping.get(minecraft_type, minecraft_type)
     
