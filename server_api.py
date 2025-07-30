@@ -19,17 +19,26 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 # Import ore generation services
+ORE_SERVICES_AVAILABLE = False
+ore_service = None
+java_ore_service = None
+
 try:
     from ore_generator import OreFinderService, OreResult
-    from java_ore_generator import JavaOreFinderService, JavaOreResult
+    logger.info("✅ Bedrock ore generation service loaded successfully")
     ORE_SERVICES_AVAILABLE = True
-    logger.info("✅ Ore generation services loaded successfully")
 except ImportError as e:
-    ORE_SERVICES_AVAILABLE = False
-    logger.warning(f"⚠️ Ore generation services not available: {e}")
+    logger.warning(f"⚠️ Bedrock ore generation service not available: {e}")
 except Exception as e:
-    ORE_SERVICES_AVAILABLE = False
-    logger.warning(f"⚠️ Ore generation services failed to load: {e}")
+    logger.warning(f"⚠️ Bedrock ore generation service failed to load: {e}")
+
+try:
+    from java_ore_generator import JavaOreFinderService, JavaOreResult
+    logger.info("✅ Java ore generation service loaded successfully")
+except ImportError as e:
+    logger.warning(f"⚠️ Java ore generation service not available: {e}")
+except Exception as e:
+    logger.warning(f"⚠️ Java ore generation service failed to load: {e}")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -48,17 +57,20 @@ app.add_middleware(
 )
 
 # Initialize the ore finder services if available
-ore_service = None
-java_ore_service = None
-
 if ORE_SERVICES_AVAILABLE:
     try:
         ore_service = OreFinderService()
-        java_ore_service = JavaOreFinderService()
-        logger.info("✅ Ore generation services initialized successfully")
+        logger.info("✅ Bedrock ore generation service initialized successfully")
     except Exception as e:
         ORE_SERVICES_AVAILABLE = False
-        logger.warning(f"⚠️ Failed to initialize ore services: {e}")
+        logger.warning(f"⚠️ Failed to initialize Bedrock ore service: {e}")
+
+try:
+    if 'JavaOreFinderService' in globals():
+        java_ore_service = JavaOreFinderService()
+        logger.info("✅ Java ore generation service initialized successfully")
+except Exception as e:
+    logger.warning(f"⚠️ Failed to initialize Java ore service: {e}")
 
 # Pydantic models for ore generation API
 class OreLocationResponse(BaseModel):
