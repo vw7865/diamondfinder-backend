@@ -236,13 +236,17 @@ async def find_ores(request: OreSearchRequest):
             request.seed, 
             request.x, 
             request.z, 
-            radius=request.radius,
-            ore_type=request.oreType
+            radius=request.radius
         )
+        
+        # Filter by ore type if specified
+        filtered_ores = result.ores
+        if request.oreType:
+            filtered_ores = [ore for ore in result.ores if ore.type.lower() == request.oreType.lower()]
         
         # Convert to response format
         ore_locations = []
-        for ore in result.ores:
+        for ore in filtered_ores:
             ore_locations.append(OreLocationResponse(
                 type=ore.type,
                 coordinates={"x": ore.x, "y": ore.y, "z": ore.z},
@@ -253,10 +257,10 @@ async def find_ores(request: OreSearchRequest):
             seed=result.seed,
             search_coordinates={"x": request.x, "z": request.z},
             chunk_coordinates={"x": result.chunk_x, "z": result.chunk_z},
-            total_ores=result.total_ores,
+            total_ores=sum(ore.count for ore in filtered_ores),
             ore_locations=ore_locations,
             success=True,
-            message=f"Found {result.total_ores} ores"
+            message=f"Found {sum(ore.count for ore in filtered_ores)} ores"
         )
         
     except Exception as e:
