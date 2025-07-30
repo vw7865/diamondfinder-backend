@@ -273,7 +273,7 @@ async def find_ores(request: OreSearchRequest):
         return OreSearchResponse(
             seed=result.seed,
             search_coordinates={"x": request.x, "z": request.z},
-            chunk_coordinates={"x": result.chunk_x, "z": result.chunk_z},
+            chunk_coordinates={"x": result.chunk_coordinates[0], "z": result.chunk_coordinates[1]},
             total_ores=sum(ore.count for ore in filtered_ores),
             ore_locations=ore_locations,
             success=True,
