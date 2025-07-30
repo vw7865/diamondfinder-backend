@@ -125,6 +125,11 @@ async def health_check():
             server_count = len(data.get('servers', []))
             return {
                 "status": "healthy",
+                "ore_services": {
+                    "available": ORE_SERVICES_AVAILABLE,
+                    "ore_service_initialized": ore_service is not None,
+                    "java_ore_service_initialized": java_ore_service is not None
+                },
                 "enriched_servers": {
                     "file_exists": True,
                     "server_count": server_count,
