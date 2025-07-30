@@ -6,9 +6,9 @@ services:
     buildCommand: |
       echo "🔨 Starting DiamondFinder backend build..."
       python -m pip install --upgrade pip
-      pip install -e .
+      pip install -r requirements.txt
       chmod +x vanilla_generator
-      echo "🧪 Testing imports..."
+      echo "🧪 Testing imports and ore generation..."
       python -c "
 import fastapi
 import uvicorn
@@ -21,11 +21,17 @@ print('✅ All core imports successful!')
 try:
     from server_api import app
     print('✅ Server API imported successfully!')
+    from java_ore_generator import JavaOreFinderService
+    service = JavaOreFinderService()
+    result = service.find_ores(5522, 2, 3, '1.20', radius=1, ore_type='diamond')
+    print(f'✅ Java ore generation working: Found {result.total_count} diamonds')
 except ImportError as e:
-    print(f'⚠️ Server API import warning: {e}')
+    print(f'⚠️ Import warning: {e}')
+except Exception as e:
+    print(f'⚠️ Ore generation warning: {e}')
 print('🎉 Build completed successfully!')
 "
-    startCommand: python server_api.py
+    startCommand: python -m uvicorn server_api:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0

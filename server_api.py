@@ -334,11 +334,11 @@ async def find_java_ores(request: JavaOreSearchRequest):
             seed=result.seed,
             search_coordinates={"x": request.x, "z": request.z},
             version=request.version,
-            chunk_coordinates={"x": result.chunk_x, "z": result.chunk_z},
-            total_ores=result.total_ores,
+            chunk_coordinates={"x": result.chunk_coordinates[0], "z": result.chunk_coordinates[1]},
+            total_ores=result.total_count,
             ore_locations=ore_locations,
             success=True,
-            message=f"Found {result.total_ores} ores"
+            message=f"Found {result.total_count} ores"
         )
         
     except Exception as e:
