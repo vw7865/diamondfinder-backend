@@ -254,13 +254,12 @@ async def find_ores(request: OreSearchRequest):
             request.seed, 
             request.x, 
             request.z, 
-            radius=request.radius
+            radius=request.radius,
+            ore_type=request.oreType
         )
         
-        # Filter by ore type if specified
+        # Use the filtered results from the service
         filtered_ores = result.ores
-        if request.oreType:
-            filtered_ores = [ore for ore in result.ores if ore.type.lower() == request.oreType.lower()]
         
         # Convert to response format
         ore_locations = []
