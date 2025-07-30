@@ -92,6 +92,7 @@ class JavaOreSearchRequest(BaseModel):
     version: str
     radius: Optional[int] = 1
     oreType: Optional[str] = None
+    oreTypes: Optional[List[str]] = None
 
 class OreSearchResponse(BaseModel):
     seed: int
@@ -318,7 +319,8 @@ async def find_java_ores(request: JavaOreSearchRequest):
             request.z, 
             request.version,
             radius=request.radius,
-            ore_type=request.oreType
+            ore_type=request.oreType,
+            ore_types=request.oreTypes
         )
         
         # Convert to response format

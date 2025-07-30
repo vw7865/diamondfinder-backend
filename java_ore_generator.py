@@ -207,7 +207,7 @@ class JavaOreFinderService:
     def __init__(self):
         self.generator = JavaMinecraftOreGenerator()
     
-    def find_ores(self, seed: int, x: int, z: int, version: str, radius: int = 1, ore_type: str = None) -> JavaOreResult:
+    def find_ores(self, seed: int, x: int, z: int, version: str, radius: int = 1, ore_type: str = None, ore_types: List[str] = None) -> JavaOreResult:
         """
         Find ores around the specified coordinates in Java Edition
         
@@ -245,9 +245,18 @@ class JavaOreFinderService:
             if distance <= max_distance:
                 filtered_ores.append(ore)
         
-        # Filter by ore type if specified
-        if ore_type:
-            filtered_ores = [ore for ore in filtered_ores if ore.type.lower() == ore_type.lower()]
+        # Filter by ore type(s) if specified
+        if ore_type or ore_types:
+            # Handle both single ore type and multiple ore types
+            target_types = []
+            if ore_type:
+                target_types.append(ore_type.lower())
+            if ore_types:
+                target_types.extend([ot.lower() for ot in ore_types])
+            
+            # Remove duplicates and filter
+            target_types = list(set(target_types))
+            filtered_ores = [ore for ore in filtered_ores if ore.type.lower() in target_types]
         
         # Sort by distance from search point
         filtered_ores.sort(key=lambda o: ((o.x - x) ** 2 + (o.z - z) ** 2) ** 0.5)
