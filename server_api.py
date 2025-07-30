@@ -248,7 +248,12 @@ async def find_ores(request: OreSearchRequest):
         )
     
     try:
-        logger.info(f"Searching for ores: seed={request.seed}, x={request.x}, z={request.z}, radius={request.radius}")
+        logger.info(f"🔍 RECEIVED REQUEST - Bedrock Edition:")
+        logger.info(f"   Seed: {request.seed}")
+        logger.info(f"   X: {request.x}, Z: {request.z}")
+        logger.info(f"   Radius: {request.radius}")
+        logger.info(f"   OreType: '{request.oreType}' (type: {type(request.oreType)})")
+        logger.info(f"   Full request object: {request}")
         
         result = ore_service.find_ores(
             request.seed, 
@@ -260,6 +265,12 @@ async def find_ores(request: OreSearchRequest):
         
         # Use the filtered results from the service
         filtered_ores = result.ores
+        logger.info(f"📊 SERVICE RESULTS:")
+        logger.info(f"   Total ores before filtering: {len(result.ores)}")
+        logger.info(f"   Total ores after filtering: {len(filtered_ores)}")
+        logger.info(f"   Ore types found: {list(set([ore.type for ore in filtered_ores]))}")
+        if filtered_ores:
+            logger.info(f"   First few ores: {[(ore.type, ore.x, ore.y, ore.z) for ore in filtered_ores[:3]]}")
         
         # Convert to response format
         ore_locations = []
