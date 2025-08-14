@@ -138,9 +138,8 @@ class MinecraftOreGenerator:
             block_z = world_z + offset_z
             
             # Ensure coordinates are within reasonable bounds
-            if (0 <= block_x < chunk_x * 16 + 16 and 
-                -64 <= block_y <= 320 and 
-                0 <= block_z < chunk_z * 16 + 16):
+            # Note: block_x and block_z can be negative, only Y has specific bounds
+            if (-64 <= block_y <= 320):
                 
                 # For exposure-based ores, ensure they're not completely buried
                 if exposure and block_y < 0:
